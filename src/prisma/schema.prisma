@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model EFMigrationsHistory {
+  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.NVarChar(150)
+  ProductVersion String @db.NVarChar(32)
+
+  @@map("__EFMigrationsHistory")
+}
+
+model Category {
+  Id   Int    @id(map: "PK_Category") @default(autoincrement())
+  Name String @db.NVarChar(80)
+  Slug String @unique(map: "IX_Category_Slug") @db.VarChar(80)
+  Post Post[]
+}
+
+model Post {
+  Id             Int       @id(map: "PK_Post") @default(autoincrement())
+  Title          String    @db.NVarChar(Max)
+  Summary        String    @db.NVarChar(Max)
+  Body           String    @db.NVarChar(Max)
+  Slug           String    @unique(map: "IX_Post_Slug") @db.NVarChar(450)
+  CreateDate     DateTime
+  LastUpdateDate DateTime  @default(now(), map: "DF__Post__LastUpdate__534D60F1") @db.SmallDateTime
+  CategoryId     Int
+  AuthorId       Int
+  User           User      @relation(fields: [AuthorId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Post_Author")
+  Category       Category  @relation(fields: [CategoryId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Post_Category")
+  PostTag        PostTag[]
+
+  @@index([AuthorId], map: "IX_Post_AuthorId")
+  @@index([CategoryId], map: "IX_Post_CategoryId")
+}
+
+model PostTag {
+  PostId Int
+  TagId  Int
+  Post   Post @relation(fields: [PostId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PostTag_PostId")
+  Tag    Tag  @relation(fields: [TagId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PostTag_TagId")
+
+  @@id([PostId, TagId], map: "PK_PostTag")
+  @@index([TagId], map: "IX_PostTag_TagId")
+}
+
+model Role {
+  Id       Int        @id(map: "PK_Role") @default(autoincrement())
+  Name     String     @db.NVarChar(80)
+  Slug     String     @unique(map: "IX_Role_Slug") @db.VarChar(80)
+  UserRole UserRole[]
+}
+
+model Tag {
+  Id      Int       @id(map: "PK_Tag") @default(autoincrement())
+  Name    String    @db.NVarChar(80)
+  Slug    String    @unique(map: "IX_Tag_Slug") @db.VarChar(80)
+  PostTag PostTag[]
+}
+
+model User {
+  Id           Int        @id(map: "PK_User") @default(autoincrement())
+  Name         String     @db.NVarChar(80)
+  Email        String     @db.VarChar(160)
+  PassowrdHash String     @db.VarChar(255)
+  Image        String?    @db.NVarChar(Max)
+  Slug         String     @unique(map: "IX_User_Slug") @db.VarChar(80)
+  Bio          String?    @db.NVarChar(Max)
+  Post         Post[]
+  UserRole     UserRole[]
+}
+
+model UserRole {
+  RoleId Int
+  UserId Int
+  Role   Role @relation(fields: [RoleId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRole_RoleId")
+  User   User @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserRole_UserId")
+
+  @@id([RoleId, UserId], map: "PK_UserRole")
+  @@index([UserId], map: "IX_UserRole_UserId")
+}
