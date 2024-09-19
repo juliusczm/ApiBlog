@@ -15,9 +15,9 @@ router
     .route('/categories')
     .get(categoryController.getAll);
 
-// router
-//     .route('/categories/:id')
-//     .get(categoryController.getById)
+router
+    .route('/categories/:id')
+    .get(categoryController.getById)
 //     .put(categoryController.update)
 //     .delete(categoryController.delete)
 

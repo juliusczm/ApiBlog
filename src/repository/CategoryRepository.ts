@@ -14,4 +14,13 @@ export class CategoryRepository implements IRepository<Category> {
         return this._database.orm.category.findMany();
     }
 
+    getById(id: number): Promise<Category> {
+        return this._database.orm.category.findUniqueOrThrow({
+            where: {
+                Id: id,
+            },
+        });
+
+    }
+
 }

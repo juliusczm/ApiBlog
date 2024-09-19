@@ -1,8 +1,9 @@
 
 //import { createCategory } from '../../models/category/createCategory.js';
-import { Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { ResponseViewModel } from '../../viewModels/responseViewModel.js';
 import { CategoryRepository } from '../../repository/CategoryRepository.js';
+import { handleOrmError } from '../../handles/handleOrmError.js';
 
 export class CategoryController {
 
@@ -13,10 +14,8 @@ export class CategoryController {
         this._categoryRepository = categoryRepository;
     }
 
-    getAll = async (req: Request, res: Response) => {
+    getAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
-
-            // const categories = await this._database.orm.category.findMany();
 
             const categories = await this._categoryRepository.getAll();
 
@@ -25,10 +24,26 @@ export class CategoryController {
             return res.status(200).json(successViewModel);
 
         } catch (error) {
+            next(error);
+            return;
+        }
+    }
 
-            const errorViewModel = ResponseViewModel.error(["Erro interno no servidor."]);
+    getById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
 
-            return res.status(500).json(errorViewModel);
+            const id: number = parseInt(req.params.id);
+
+            const category = await this._categoryRepository.getById(id);
+
+            const successViewModel = ResponseViewModel.success(category);
+
+            return res.status(200).json(successViewModel);
+
+        } catch (error) {
+            next(error);
+            return;
         }
     }
 }
+
