@@ -8,16 +8,19 @@ const app = express();
 
 app.use(express.json());
 
+// Handling iniciar
 app.use(handlingJsonError);
 
+
+//Rotas
 app.use(categoryRoute);
 
+
+// Handling erros
 app.use(handleOrmError);
 app.use(handleGenericError);
+
 
 app.listen(3000, () => {
     console.log('our app is running locally...');
 });
-
-//debugger;
-

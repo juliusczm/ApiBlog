@@ -2,6 +2,9 @@ import express from 'express'
 import { CategoryController } from '../../controller/category/categoryController.js'
 import { CategoryRepository } from '../../repository/CategoryRepository.js';
 import { Database } from '../../service/database.js';
+import { handleBodyValidate } from '../../handles/handleBodyValidate.js';
+import { CreateCategorySchema } from '../../models/categoryModel.js';
+import { handleOrmError } from '../../handles/handleOrmError.js';
 
 // const categoryController = new CategoryController(prisma);
 const database = Database.getInstance();
@@ -13,13 +16,14 @@ const router = express.Router();
 
 router
     .route('/categories')
-    .get(categoryController.getAll);
+    .get(categoryController.getAll)
+    .post(handleBodyValidate(CreateCategorySchema), categoryController.create);
 
 router
     .route('/categories/:id')
     .get(categoryController.getById)
-//     .put(categoryController.update)
-//     .delete(categoryController.delete)
+    .put(categoryController.update)
+    .delete(categoryController.delete)
 
 
 export default router;

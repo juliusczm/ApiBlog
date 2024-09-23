@@ -6,19 +6,21 @@ interface SyntaxErrorGeneric extends SyntaxError {
     body?: any;
 }
 
+
 export const handlingJsonError = (err: unknown, req: Request, res: Response, next: NextFunction) => {
 
-    const typedError = err as SyntaxErrorGeneric;
+    if (['POST', 'PATCH', 'PUT'].includes(req.method)) {
 
-    if (typedError instanceof SyntaxError && typedError.status === 400 && 'body' in typedError) {
+        const typedError = err as SyntaxErrorGeneric;
 
-        const errorViewModel = ResponseViewModel.error(['Formato Json inválido.']);
+        if (typedError instanceof SyntaxError && typedError.status === 400 && 'body' in typedError) {
 
-        return res.status(400).json(errorViewModel);
+            const errorViewModel = ResponseViewModel.error(['Formato Json inválido.']);
 
+            return res.status(400).json(errorViewModel);
+
+        }
     }
 
-    next();
-
-    return;
-};
+    return next();
+}
