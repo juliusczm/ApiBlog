@@ -4,7 +4,6 @@ import { CategoryRepository } from '../../repository/CategoryRepository.js';
 import { Database } from '../../service/database.js';
 import { handleBodyValidate } from '../../handles/handleBodyValidate.js';
 import { CreateCategorySchema } from '../../models/categoryModel.js';
-import { handleOrmError } from '../../handles/handleOrmError.js';
 
 // const categoryController = new CategoryController(prisma);
 const database = Database.getInstance();
@@ -20,10 +19,19 @@ router
     .post(handleBodyValidate(CreateCategorySchema), categoryController.create);
 
 router
+    .route('/categories/posts')
+    .get(categoryController.getWithCountPost)
+
+router
+    .route('/categories/:id/posts')
+    .get(categoryController.getByIdWithCountPost)
+
+router
     .route('/categories/:id')
     .get(categoryController.getById)
-    .put(categoryController.update)
+    .put(handleBodyValidate(CreateCategorySchema), categoryController.update)
     .delete(categoryController.delete)
+
 
 
 export default router;

@@ -1,3 +1,4 @@
+import { Post } from "@prisma/client";
 import { z } from "zod";
 
 export interface CategoryDTO {
@@ -6,9 +7,34 @@ export interface CategoryDTO {
     Slug: string;
 }
 
-export interface CreateCategoryDTO {
+export interface EditorCategoryDTO {
     Name: string;
     Slug: string;
+}
+
+
+export interface CategoryWithPost {
+    Id: number;
+    Name: string;
+    Slug: string;
+    Post?: {
+        Id: number;
+        Title: string;
+        Summary: string;
+        Body: string;
+        Slug: string;
+        CreateDate: Date;
+        LastUpdateDate: Date;
+        CategoryId: number;
+        AuthorId: number;
+    }[];
+}
+
+export interface CategoryWithTotalPosts {
+    Id: number;
+    Name: string;
+    Slug: string;
+    Posts: number;
 }
 
 export const CreateCategorySchema = z.object({

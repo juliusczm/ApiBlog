@@ -7,13 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model EFMigrationsHistory {
-  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.NVarChar(150)
-  ProductVersion String @db.NVarChar(32)
-
-  @@map("__EFMigrationsHistory")
-}
-
 model Category {
   Id   Int    @id(map: "PK_Category") @default(autoincrement())
   Name String @db.NVarChar(80)

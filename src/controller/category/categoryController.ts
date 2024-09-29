@@ -2,9 +2,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { ResponseViewModel } from '../../viewModels/responseViewModel.js';
 import { CategoryRepository } from '../../repository/CategoryRepository.js';
-import { CategoryDTO, CreateCategoryDTO } from '../../models/categoryModel.js';
+import { CategoryDTO, CategoryWithTotalPosts, EditorCategoryDTO } from '../../models/categoryModel.js';
 
 type CategoryResponse = CategoryDTO[] | CategoryDTO | null;
+
+type CategoryWithPostsResponse = CategoryWithTotalPosts[] | CategoryWithTotalPosts | null;
+
 
 export class CategoryController {
 
@@ -52,7 +55,7 @@ export class CategoryController {
         }
     }
 
-    create = async (req: Request<{}, {}, CreateCategoryDTO>, res: Response<ResponseViewModel<CategoryResponse>>, next: NextFunction) => {
+    create = async (req: Request<{}, {}, EditorCategoryDTO>, res: Response<ResponseViewModel<CategoryResponse>>, next: NextFunction) => {
         try {
 
             const { body } = req;
@@ -90,7 +93,7 @@ export class CategoryController {
         }
     }
 
-    update = async (req: Request<{ id: string }, {}, CreateCategoryDTO>, res: Response<ResponseViewModel<CategoryResponse>>, next: NextFunction) => {
+    update = async (req: Request<{ id: string }, {}, EditorCategoryDTO>, res: Response<ResponseViewModel<CategoryResponse>>, next: NextFunction) => {
         try {
 
             const id: number = parseInt(req.params.id);
@@ -100,7 +103,7 @@ export class CategoryController {
 
             const { Name, Slug } = req.body;
 
-            const categoryEdited: CreateCategoryDTO = {
+            const categoryEdited: EditorCategoryDTO = {
                 Name: Name,
                 Slug: Slug
             }
@@ -117,6 +120,66 @@ export class CategoryController {
         } catch (error) {
             return next(error);
         }
+    }
+
+    getWithCountPost = async (req: Request, res: Response<ResponseViewModel<CategoryWithPostsResponse>>, next: NextFunction) => {
+
+        try {
+
+            const categoryWithCountPost = await this._categoryRepository.getWithCountPost();
+
+            if (categoryWithCountPost == null)
+                return res.status(200).json(ResponseViewModel.error(["Categoria não encontrada"]));
+
+            const viewModel: CategoryWithTotalPosts[] = categoryWithCountPost.map(item => ({
+                Id: item.Id,
+                Name: item.Name,
+                Slug: item.Slug,
+                Posts: item.Post?.length || 0
+            }));
+
+
+            const successViewModel = ResponseViewModel.success(viewModel);
+
+            return res.status(200).json(successViewModel);
+
+
+        } catch (error) {
+            return next(error);
+        }
+
+    }
+
+    getByIdWithCountPost = async (req: Request, res: Response<ResponseViewModel<CategoryWithPostsResponse>>, next: NextFunction) => {
+
+        try {
+
+            const id: number = parseInt(req.params.id);
+
+            if (isNaN(id))
+                return res.status(400).json(ResponseViewModel.error(["O id da categoria deve ser um número válido"]));
+
+            const categoryWithCountPost = await this._categoryRepository.getByIdWithCountPost(id);
+
+            if (categoryWithCountPost == null)
+                return res.status(200).json(ResponseViewModel.error(["Categoria não encontrada"]));
+
+            const viewModel: CategoryWithTotalPosts = {
+                Id: categoryWithCountPost.Id,
+                Name: categoryWithCountPost.Name,
+                Slug: categoryWithCountPost.Slug,
+                Posts: categoryWithCountPost.Post?.length || 0
+            };
+
+            const successViewModel = ResponseViewModel.success(viewModel);
+
+            return res.status(200).json(successViewModel);
+
+
+        } catch (error) {
+            return next(error);
+        }
+
     }
 
 }

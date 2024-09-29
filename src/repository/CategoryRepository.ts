@@ -1,9 +1,9 @@
-import { CategoryDTO, CreateCategoryDTO } from "../models/categoryModel";
+import { CategoryDTO, CategoryWithPost, EditorCategoryDTO } from "../models/categoryModel";
 import { Database } from "../service/database";
 import { IRepository } from "./IRepository";
 
 
-export class CategoryRepository implements IRepository<CreateCategoryDTO, CategoryDTO> {
+export class CategoryRepository implements IRepository<EditorCategoryDTO, CategoryDTO> {
 
     private _database: Database;
 
@@ -24,7 +24,7 @@ export class CategoryRepository implements IRepository<CreateCategoryDTO, Catego
 
     }
 
-    create(input: CreateCategoryDTO): Promise<CategoryDTO> {
+    create(input: EditorCategoryDTO): Promise<CategoryDTO> {
 
         const category: Promise<CategoryDTO> = this._database.orm.category.create({
             data: input
@@ -35,7 +35,7 @@ export class CategoryRepository implements IRepository<CreateCategoryDTO, Catego
 
     }
 
-    update(id: number, data: CreateCategoryDTO): Promise<CategoryDTO> {
+    update(id: number, data: EditorCategoryDTO): Promise<CategoryDTO> {
 
         const category: Promise<CategoryDTO> = this._database.orm.category.update({
             where: {
@@ -60,4 +60,27 @@ export class CategoryRepository implements IRepository<CreateCategoryDTO, Catego
         return category;
     }
 
+    getWithCountPost(): Promise<CategoryWithPost[]> {
+        const categoryWithCountPosts: Promise<CategoryWithPost[]> = this._database.orm.category.findMany({
+            include: {
+                Post: true,
+            },
+        });
+
+        return categoryWithCountPosts;
+    }
+
+
+    getByIdWithCountPost(id: number): Promise<CategoryWithPost | null> {
+        const categoryWithCountPosts = this._database.orm.category.findUnique({
+            where: {
+                Id: id,
+            },
+            include: {
+                Post: true,
+            },
+        });
+
+        return categoryWithCountPosts;
+    }
 }
